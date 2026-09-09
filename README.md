@@ -23,7 +23,7 @@ This repository implements a multimodal neural network architecture that combine
 
 ---
 
-## 📈 Latent Space Visualization
+##  Latent Space Visualization
 Below is the t-SNE projection of the cross-attention fused embeddings $z$, highlighting clear topological separation between contrasting genres (`classical` vs. `techno`):
 
 ![t-SNE Plot](results/plots/task3_tsne_fused.png)
