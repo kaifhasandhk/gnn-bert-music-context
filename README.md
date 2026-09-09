@@ -6,12 +6,12 @@
 
 ---
 
-## 📌 Overview
+##  Overview
 This repository implements a multimodal neural network architecture that combines structural audio graph representations (GraphSAGE on 3-second audio segment graphs) with natural language tag context (DistilBERT) to perform multi-label music tagging and context understanding.
 
 ---
 
-## 📊 Performance & Ablation Results
+##  Performance & Ablation Results
 
 | Model / Architecture | Macro-F1 | Micro-F1 | Key Insight |
 | :--- | :---: | :---: | :--- |
@@ -30,4 +30,18 @@ Below is the t-SNE projection of the cross-attention fused embeddings $z$, highl
 
 ---
 
-## 📁 Repository Directory Structure
+##  Repository Directory Structure
+gnn-bert-music-context/
+├── notebooks/
+│   └── demo_context.ipynb         # End-to-end execution notebook
+├── data/
+│   └── processed/
+│       └── graphs/                # Preprocessed PyTorch Geometric graph samples (.pt)
+├── results/
+│   └── plots/
+│       └── task3_tsne_fused.png   # Latent space visualization
+└── README.md
+
+##  Quickstart
+1. Open `notebooks/demo_context.ipynb` in Google Colab or Kaggle.
+2. Execute all cells sequentially to build segment graphs, train model variants, and reproduce evaluation metrics and case studies.
