@@ -31,6 +31,7 @@ Below is the t-SNE projection of the cross-attention fused embeddings $z$, highl
 ---
 
 ##  Repository Directory Structure
+```text
 gnn-bert-music-context/
 ├── notebooks/
 │   └── demo_context.ipynb         # End-to-end execution notebook
@@ -41,7 +42,7 @@ gnn-bert-music-context/
 │   └── plots/
 │       └── task3_tsne_fused.png   # Latent space visualization
 └── README.md
-
+```
 ##  Quickstart
 1. Open `notebooks/demo_context.ipynb` in Google Colab or Kaggle.
 2. Execute all cells sequentially to build segment graphs, train model variants, and reproduce evaluation metrics and case studies.
