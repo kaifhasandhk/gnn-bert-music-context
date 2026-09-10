@@ -2,25 +2,26 @@ dataset:
   name: "MagnaTagATune"
   sample_rate: 22050
   clip_duration: 29.0
-  segment_duration: 3.22
-  num_segments: 9
+  segment_duration: 3.0
   num_tags: 50
-  similarity_threshold: 0.75
+  sim_threshold: 0.85
+  max_sim_edges_per_node: 3
 
 features:
-  stft_dim: 16
-  mel_dim: 128
-  chroma_dim: 8
-  total_node_dim: 152
+  n_mels: 40
+  n_chroma: 12
+  total_node_dim: 104   # 40 mean + 40 std + 12 mean + 12 std
 
 model:
   bert_model_name: "distilbert-base-uncased"
   bert_dim: 768
-  gnn_hidden_dim: 256
-  cross_attn_dim: 128
-  dropout: 0.2
+  gnn_hidden_dim: 128
+  num_tags: 50
 
 training:
   batch_size: 32
-  learning_rate: 0.001
-  epochs: 10
+  learning_rate_bert: 0.00002
+  learning_rate_gnn: 0.001
+  epochs_bert: 6
+  epochs_gnn: 10
+  epochs_fusion: 6
