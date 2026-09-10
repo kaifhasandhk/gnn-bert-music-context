@@ -1,34 +1,47 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
+from torch_geometric.nn import SAGEConv, global_mean_pool
+from transformers import DistilBertModel
 
-class CrossAttentionFusion(nn.Module):
-    """Task 3: Cross-Attention Multimodal Fusion (GNN Query x BERT Key/Value)."""
-    def __init__(self, d_gnn: int = 256, d_bert: int = 768, d_k: int = 128, num_tags: int = 50):
-        super(CrossAttentionFusion, self).__init__()
-        self.W_q = nn.Linear(d_gnn, d_k)
-        self.W_k = nn.Linear(d_bert, d_k)
-        self.W_v = nn.Linear(d_bert, d_k)
-        self.scale = d_k ** 0.5
-        
-        self.mlp = nn.Sequential(
-            nn.Linear(d_gnn + d_k, 256),
+class CrossAttentionFusionModel(nn.Module):
+    """Task 3: Cross-Attention Multimodal Fusion (Query = GNN, Key/Value = BERT)."""
+    def __init__(self, num_tags: int = 50, gnn_in_dim: int = 104, gnn_hidden: int = 128, bert_dim: int = 768):
+        super().__init__()
+        self.gnn_hidden = gnn_hidden
+
+        self.conv1 = SAGEConv(gnn_in_dim, gnn_hidden)
+        self.conv2 = SAGEConv(gnn_hidden, gnn_hidden)
+
+        self.bert = DistilBertModel.from_pretrained('distilbert-base-uncased')
+
+        self.q_proj = nn.Linear(gnn_hidden, gnn_hidden)
+        self.k_proj = nn.Linear(bert_dim, gnn_hidden)
+        self.v_proj = nn.Linear(bert_dim, gnn_hidden)
+
+        self.head = nn.Sequential(
+            nn.Linear(gnn_hidden * 2, 128),
             nn.ReLU(),
             nn.Dropout(0.2),
-            nn.Linear(256, num_tags)
+            nn.Linear(128, num_tags)
         )
 
-    def forward(self, g, h_text):
-        # g: Graph vector [B, 256]
-        # h_text: BERT tokens [B, L, 768]
-        Q = self.W_q(g).unsqueeze(1)    # [B, 1, 128]
-        K = self.W_k(h_text)            # [B, L, 128]
-        V = self.W_v(h_text)            # [B, L, 128]
-        
-        scores = torch.matmul(Q, K.transpose(-2, -1)) / self.scale
-        attn = F.softmax(scores, dim=-1)
-        c = torch.matmul(attn, V).squeeze(1) # Context vector [B, 128]
-        
-        z = torch.cat([g, c], dim=-1)         # Fused embedding z [B, 384]
-        out = self.mlp(z)
-        return z, torch.sigmoid(out)
+    def forward(self, x, edge_index, batch, input_ids, attention_mask):
+        h = F.relu(self.conv1(x, edge_index))
+        h = F.relu(self.conv2(h, edge_index))
+        g = global_mean_pool(h, batch)
+
+        bert_out = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+        h_text = bert_out.last_hidden_state
+
+        Q = self.q_proj(g).unsqueeze(1)
+        K = self.k_proj(h_text)
+        V = self.v_proj(h_text)
+
+        attn_weights = F.softmax(torch.bmm(Q, K.transpose(1, 2)) / np.sqrt(self.gnn_hidden), dim=-1)
+        context = torch.bmm(attn_weights, V).squeeze(1)
+
+        z = torch.cat([g, context], dim=-1)
+        logits = self.head(z)
+        return logits, z
