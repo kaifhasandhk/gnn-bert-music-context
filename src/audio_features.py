@@ -1,31 +1,32 @@
-import librosa
 import numpy as np
+import librosa
 
-def segment_audio(y: np.ndarray, sr: int = 22050, num_segments: int = 9):
-    """Splits raw audio signal into N temporal non-overlapping segments."""
-    segment_len = len(y) // num_segments
-    segments = []
-    for i in range(num_segments):
-        chunk = y[i * segment_len : (i + 1) * segment_len]
-        segments.append(chunk)
-    return segments
-
-def extract_segment_features(chunk: np.ndarray, sr: int = 22050) -> np.ndarray:
-    """Extracts 152-dim node feature vector (16 STFT + 128 Mel + 8 Chroma)."""
-    # STFT Statistics (16 dim)
-    stft = np.abs(librosa.stft(chunk))
-    stft_mean = np.mean(stft[:8], axis=1)
-    stft_std = np.std(stft[:8], axis=1)
-    stft_feat = np.concatenate([stft_mean, stft_std])
-
-    # Mel-Spectrogram (128 dim)
-    mel = librosa.feature.melspectrogram(y=chunk, sr=sr, n_mels=128)
+def extract_fast_segment_features(y: np.ndarray, sr: int = 22050, seg_duration: float = 3.0, n_mels: int = 40, n_chroma: int = 12):
+    """Vectorized single-pass extraction producing a 104-dim node feature matrix."""
+    hop_length = 512
+    mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=n_mels, hop_length=hop_length)
     mel_db = librosa.power_to_db(mel, ref=np.max)
-    mel_feat = np.mean(mel_db, axis=1)
+    chroma = librosa.feature.chroma_stft(y=y, sr=sr, n_chroma=n_chroma, hop_length=hop_length)
 
-    # Chroma Pitch Features (8 dim)
-    chroma = librosa.feature.chroma_stft(y=chunk, sr=sr, n_chroma=8)
-    chroma_feat = np.mean(chroma, axis=1)
+    frames_per_seg = int((seg_duration * sr) / hop_length)
+    total_frames = mel_db.shape[1]
+    n_segments = total_frames // frames_per_seg
 
-    # Concatenate into 152-dimensional array
-    return np.concatenate([stft_feat, mel_feat, chroma_feat])
+    if n_segments < 2:
+        return None
+
+    feats = []
+    for i in range(n_segments):
+        start_f = i * frames_per_seg
+        end_f = (i + 1) * frames_per_seg
+
+        m_seg = mel_db[:, start_f:end_f]
+        c_seg = chroma[:, start_f:end_f]
+
+        feat = np.concatenate([
+            m_seg.mean(axis=1), m_seg.std(axis=1),
+            c_seg.mean(axis=1), c_seg.std(axis=1)
+        ])
+        feats.append(feat)
+
+    return np.stack(feats)
