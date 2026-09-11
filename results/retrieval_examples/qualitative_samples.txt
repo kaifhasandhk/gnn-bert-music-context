@@ -1,0 +1,17 @@
+=== QUALITATIVE RETRIEVAL & FUSION EVALUATION EXAMPLES ===
+
+Query ID: case_study_01
+Ground Truth: synth, electronic, fast, drums
+BERT Predictions: electronic, pop, synth
+GNN Predictions: synth, instrumental, fast
+Fusion Predictions: synth, electronic, fast, drums
+Notes: Fusion model successfully recovered 'drums' tag missing from BERT-only baseline.
+--------------------------------------------------
+
+Query ID: case_study_02
+Ground Truth: piano, classical, slow, quiet
+BERT Predictions: piano, classical
+GNN Predictions: piano, slow, ambient
+Fusion Predictions: piano, classical, slow, quiet
+Notes: Complete tag set match.
+--------------------------------------------------
