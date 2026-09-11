@@ -33,15 +33,33 @@ Below is the t-SNE projection of the cross-attention fused embeddings $z$, highl
 ##  Repository Directory Structure
 ```text
 gnn-bert-music-context/
-├── notebooks/
-│   └── demo_context.ipynb         # End-to-end execution notebook
+├── README.md
+├── requirements.txt
+├── config.yaml
 ├── data/
-│   └── processed/
-│       └── graphs/                # Preprocessed PyTorch Geometric graph samples (.pt)
+│   ├── raw/                      # FMA, MagnaTagATune audio downloads
+│   ├── processed/                # Saved PyG .pt graphs & feature caches
+│   └── splits/                   # Train / Val / Test metadata JSONs
+├── notebooks/
+│   ├── eda.ipynb                 # Tag distribution & dataset statistics
+│   └── demo_context.ipynb        # End-to-end Kaggle training & ablation pipeline
+├── src/
+│   ├── audio_features.py         # Vectorized Mel + Chroma feature extraction (104-dim)
+│   ├── graph_builder.py          # Dynamic audio segment graph builder
+│   ├── bert_encoder.py           # Task 1: DistilBERT tag classifier
+│   ├── gnn_model.py              # Task 2: 2-Layer GraphSAGE GNN
+│   ├── fusion_model.py           # Task 3: Cross-Attention GNN-BERT fusion
+│   ├── contrastive.py            # Task 4: InfoNCE cross-modal loss (Extension)
+│   ├── train.py                  # Standalone execution pipeline
+│   └── evaluate.py               # Threshold sweeping & Macro/Micro F1 metrics
 ├── results/
-│   └── plots/
-│       └── task3_tsne_fused.png   # Latent space visualization
-└── README.md
+│   ├── metrics.json              # Programmatic ablation comparison metrics
+│   ├── plots/                    # Exported t-SNE & loss curves
+│   └── retrieval_examples/
+│       ├── case_studies.json     # Quantitative test clip JSON logs
+│       └── qualitative_samples.txt # Human-readable prediction comparisons
+└── report/
+    └── final_report.pdf          # Final project paper & documentation
 ```
 ##  Quickstart
 1. Open `notebooks/demo_context.ipynb` in Google Colab or Kaggle.
