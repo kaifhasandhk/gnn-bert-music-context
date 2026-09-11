@@ -1,0 +1,7 @@
+{
+  "B1_majority_baseline": {"macro_f1": 0.021, "micro_f1": 0.161},
+  "B2_cnn_baseline": {"macro_f1": 0.229, "micro_f1": 0.354},
+  "task1_bert_only": {"macro_f1": 0.190, "micro_f1": 0.336},
+  "task2_gnn_only": {"macro_f1": 0.216, "micro_f1": 0.413},
+  "task3_fusion": {"macro_f1": 0.292, "micro_f1": 0.472}
+}
