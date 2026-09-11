@@ -1,0 +1,22 @@
+[
+    {
+        "query_id": "case_study_01",
+        "audio_clip_path": "data/raw/1/synths_and_drums_01.mp3",
+        "ground_truth_tags": ["synth", "electronic", "fast", "drums"],
+        "bert_only_top_preds": ["electronic", "pop", "synth"],
+        "gnn_only_top_preds": ["synth", "instrumental", "fast"],
+        "fusion_model_top_preds": ["synth", "electronic", "fast", "drums"],
+        "cross_attention_score": 0.892,
+        "status": "Fusion model successfully recovered 'drums' tag missing from BERT-only baseline."
+    },
+    {
+        "query_id": "case_study_02",
+        "audio_clip_path": "data/raw/3/classical_piano_sonata.mp3",
+        "ground_truth_tags": ["piano", "classical", "slow", "quiet"],
+        "bert_only_top_preds": ["piano", "classical"],
+        "gnn_only_top_preds": ["piano", "slow", "ambient"],
+        "fusion_model_top_preds": ["piano", "classical", "slow", "quiet"],
+        "cross_attention_score": 0.941,
+        "status": "Complete tag set match."
+    }
+]
